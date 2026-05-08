@@ -13,6 +13,7 @@
     },
     "edit": {
     "*": "deny",
+    ".*": "deny",
     "/tmp/*": "allow",
     ".ARCHITECTURE.md": "allow",
     ".QUESTIONS.md": "allow",
