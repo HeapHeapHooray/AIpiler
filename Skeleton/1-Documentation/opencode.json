@@ -12,7 +12,8 @@
     },
     "edit": {
     "*": "deny",
-    ".*": "allow",
+    ".ARCHITECTURE.md": "allow",
+    ".QUESTIONS.md": "allow",
     ".other_files/*": "allow"
     },
     "task": {
