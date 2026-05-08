@@ -160,12 +160,8 @@ DO NOT ACCESS FILES OUTSIDE OF THE CWD." """
 
         print(prompt)
 
-        if os.system(prompt):
-            return
-
-
-
-        add_tag_to_function(PROJ_LOC, PROJ_NAME, PROG_PATH, str(without[0]), tag_name)
+        if os.system(prompt) == 0:
+            add_tag_to_function(PROJ_LOC, PROJ_NAME, PROG_PATH, str(without[0]), tag_name)
 
 
 
