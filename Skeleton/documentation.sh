@@ -2,7 +2,7 @@ if [ -f "1-Documentation/ARCHITECTURE.md" ]; then
     echo "ARCHITECTURE.md exists, not running init.sh"
 else
     echo "ARCHITECTURE.md doesn't exists, running init.sh"
-    (cd 1-Documentation && bash 1-Documentation/init.sh)
+    (cd 1-Documentation && bash init.sh)
 fi
 
 ralph "
