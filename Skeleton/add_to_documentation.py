@@ -150,17 +150,23 @@ if __name__ == "__main__":
 
         os.chdir(documentation_folder)
 
-        prompt = f"""opencode run -m anthropic/claude-haiku-4-5 "
-aipiler_read_function_code <function_name>, to read a function's code.
-aipiler_add_tag_to_function <function_name> <tag_name>, to add a tag to a function in the Ghidra project.
-Describe the code of the function '<{without[0]}>' using aipiler_read_function_code, especially with regards to context, save it to ./ARCHITECTURE.md as you contribute to it and also refer to the ./QUESTIONS.md file to add and answer questions related to the architecture.
-Any file other than ./ARCHITECTURE.md and ./QUESTIONS.md should be stored in ./other_files
-Annotate the function being analyzed with aipiler_add_tag_to_function.
-DO NOT ACCESS FILES OUTSIDE OF THE CWD." """
+        import shlex
+
+        prompt_text = f"""
+        aipiler_read_function_code <function_name>, to read a function's code.
+        aipiler_add_tag_to_function <function_name> <tag_name>, to add a tag to a function in the Ghidra project.
+        Describe the code of the function '<{without[0]}>' using aipiler_read_function_code, especially with regards to context, save it to ./ARCHITECTURE.md as you contribute to it and also refer to the ./QUESTIONS.md file to add and answer questions related to the architecture.
+        Any file other than ./ARCHITECTURE.md and ./QUESTIONS.md should be stored in ./other_files
+        Annotate the function being analyzed with aipiler_add_tag_to_function.
+        DO NOT ACCESS FILES OUTSIDE OF THE CWD."""
+
+        prompt = f"opencode run -m anthropic/claude-haiku-4-5 {shlex.quote(prompt_text)}"
 
         print(prompt)
 
-        if os.system(prompt) == 0:
+        output = os.system(prompt)
+
+        if not output:
             add_tag_to_function(PROJ_LOC, PROJ_NAME, PROG_PATH, str(without[0]), tag_name)
 
 
