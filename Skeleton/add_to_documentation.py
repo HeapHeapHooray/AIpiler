@@ -58,7 +58,7 @@ def get_without_tag(project_location, project_name, program_path, tag_name):
                             break
                     
                     if not has_tag:
-                        output.append(f"{str(func.getEntryPoint()):<16} | {func.getName()}")
+                        output.append(f"{func.getName()}")
                         count += 1
                 
                 print("-" * 40)
@@ -67,6 +67,66 @@ def get_without_tag(project_location, project_name, program_path, tag_name):
         print(f"An error occurred: {e}")
 
     return output
+
+
+def add_tag_to_function(project_location, project_name, program_path, function_name_or_address, tag_name):
+    """
+    Opens a Ghidra project and adds a tag to a specific function.
+    """
+    try:
+        pyghidra.start()
+    except Exception as e:
+        print(f"Error starting Ghidra: {e}")
+        return
+
+    from pyghidra.api import open_project, program_context
+
+    try:
+        with open_project(project_location, project_name, create=False) as project:
+            with program_context(project, program_path) as program:
+                fm = program.getFunctionManager()
+                target_func = None
+
+                # Try to parse as an address first
+                try:
+                    addr = program.getAddressFactory().getAddress(function_name_or_address)
+                    if addr is not None:
+                         target_func = fm.getFunctionContaining(addr)
+                except Exception:
+                    pass
+
+                # If it wasn't found by address, search by name
+                if target_func is None:
+                    functions = fm.getFunctions(True)
+                    for func in functions:
+                        if func.getName() == function_name_or_address:
+                            target_func = func
+                            break
+
+                if target_func is None:
+                    print(f"Error: Function '{function_name_or_address}' not found.")
+                    return
+
+                print(f"Adding tag '{tag_name}' to function: {target_func.getName()} at {target_func.getEntryPoint()}")
+
+                # In Ghidra, all modifications must be in a transaction
+                tx_id = program.startTransaction(f"Add tag {tag_name}")
+                success = False
+                try:
+                    target_func.addTag(tag_name)
+                    success = True
+                except Exception as tx_err:
+                    print(f"Failed to add tag: {tx_err}")
+                finally:
+                    program.endTransaction(tx_id, success)
+
+                if success:
+                    print(f"Successfully added tag '{tag_name}'.")
+                    # Save the program to persist changes to the project
+                    program.save("Added tag via AIpiler tool", None)
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     tag_name = "Documented-1"
@@ -92,13 +152,21 @@ if __name__ == "__main__":
 
         prompt = f"""opencode run -m anthropic/claude-haiku-4-5 "
 aipiler_read_function_code <function_name>, to read a function's code.
+aipiler_add_tag_to_function <function_name> <tag_name>, to add a tag to a function in the Ghidra project.
 Describe the code of the function '<{without[0]}>' using aipiler_read_function_code, especially with regards to context, save it to ./ARCHITECTURE.md as you contribute to it and also refer to the ./QUESTIONS.md file to add and answer questions related to the architecture.
 Any file other than ./ARCHITECTURE.md and ./QUESTIONS.md should be stored in ./other_files
+Annotate the function being analyzed with aipiler_add_tag_to_function.
 DO NOT ACCESS FILES OUTSIDE OF THE CWD." """
 
         print(prompt)
 
-        os.system(prompt)
+        if os.system(prompt):
+            return
+
+
+
+        add_tag_to_function(PROJ_LOC, PROJ_NAME, PROG_PATH, str(without[0]), tag_name)
+
 
 
 
