@@ -7,11 +7,13 @@
     },
     "read": {
       "*": "deny",
+      "/tmp/*": "allow",
       ".*": "allow",
     ".other_files/*": "allow"
     },
     "edit": {
     "*": "deny",
+    "/tmp/*": "allow",
     ".ARCHITECTURE.md": "allow",
     ".QUESTIONS.md": "allow",
     ".other_files/*": "allow"

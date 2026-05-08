@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+
+import pyghidra
+from pyghidra.api import open_project, program_context
+import os
+import sys
+import json
+from pathlib import Path
+
+# Attempt to locate Ghidra if GHIDRA_INSTALL_DIR is not set
+if 'GHIDRA_INSTALL_DIR' not in os.environ:
+    # Common paths or the one we found
+    possible_paths = [
+        '/snap/ghidra/current/ghidra_12.0_PUBLIC',
+        '/opt/ghidra',
+        os.path.expanduser('~/ghidra')
+    ]
+    for path in possible_paths:
+        if os.path.isdir(path):
+            os.environ['GHIDRA_INSTALL_DIR'] = path
+            break
+
+def get_entry_function_name(project_location, project_name, program_path):
+    """
+    Opens a Ghidra project and finds the name of the entry function.
+    """
+    try:
+        # Initialize Ghidra
+        pyghidra.start()
+    except Exception as e:
+        print(f"Error starting Ghidra: {e}")
+        print("Please ensure GHIDRA_INSTALL_DIR is set correctly.")
+        return
+
+    try:
+        # Open the existing project
+        with open_project(project_location, project_name, create=False) as project:
+            # Open the specific program context
+            with program_context(project, program_path) as program:
+                print(f"Successfully opened: {program.getName()}")
+                
+                symbol_table = program.getSymbolTable()
+                entry_points = symbol_table.getExternalEntryPointIterator()
+                
+                if not entry_points.hasNext():
+                    print("Error: No entry points found.")
+                    return
+                
+                # Use the first entry point
+                entry_addr = entry_points.next()
+                fm = program.getFunctionManager()
+                entry_func = fm.getFunctionAt(entry_addr)
+                
+                if entry_func:
+                    print(f"Entry function: {entry_func.getName()}")
+                else:
+                    # If no function at exact address, maybe it's just a label
+                    symbol = symbol_table.getPrimarySymbol(entry_addr)
+                    if symbol:
+                        print(f"Entry symbol: {symbol.getName()}")
+                    else:
+                        print(f"Entry point at {entry_addr} but no function or symbol found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    project_aipiler = Path(__file__).parent.parent / "project.aipiler"
+    
+    # Check if project.aipiler exists to avoid crash if it doesn't
+    if not project_aipiler.exists():
+        print(f"Error: {project_aipiler} not found.")
+        sys.exit(1)
+
+    with open(project_aipiler) as f:
+        data = json.loads(f.read())
+
+    PROJ_LOC = data["project_location"]
+    PROJ_NAME = data["project_name"]
+    PROG_PATH = data["program_location"]
+    
+    # Allow command line overrides
+    if len(sys.argv) > 1:
+        PROG_PATH = sys.argv[1]
+    
+    get_entry_function_name(PROJ_LOC, PROJ_NAME, PROG_PATH)
