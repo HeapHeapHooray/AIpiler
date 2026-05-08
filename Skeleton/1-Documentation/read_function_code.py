@@ -1,0 +1,104 @@
+import pyghidra
+import os
+import sys
+import json
+
+# Attempt to locate Ghidra if GHIDRA_INSTALL_DIR is not set
+if 'GHIDRA_INSTALL_DIR' not in os.environ:
+    possible_paths = [
+        '/snap/ghidra/current/ghidra_12.0_PUBLIC',
+        '/opt/ghidra',
+        os.path.expanduser('~/ghidra')
+    ]
+    for path in possible_paths:
+        if os.path.isdir(path):
+            os.environ['GHIDRA_INSTALL_DIR'] = path
+            break
+
+def read_function_code(project_location, project_name, program_path, function_name_or_address):
+    """
+    Opens a Ghidra project and decompiles a specific function.
+    """
+    try:
+        pyghidra.start()
+    except Exception as e:
+        print(f"Error starting Ghidra: {e}")
+        print("Please ensure GHIDRA_INSTALL_DIR is set correctly.")
+        return
+
+    # Defer Ghidra imports until pyghidra.start() has been called
+    from pyghidra.api import open_project, program_context
+    from ghidra.app.decompiler import DecompInterface
+    from ghidra.util.task import ConsoleTaskMonitor
+
+    try:
+        with open_project(project_location, project_name, create=False) as project:
+            with program_context(project, program_path) as program:
+                print(f"Successfully opened: {program.getName()}")
+                
+                fm = program.getFunctionManager()
+                target_func = None
+
+                # Try to parse as an address first
+                try:
+                    addr = program.getAddressFactory().getAddress(function_name_or_address)
+                    if addr is not None:
+                         # Get the function containing this address (in case it's not the exact entry point)
+                         target_func = fm.getFunctionContaining(addr)
+                except Exception:
+                    pass
+                
+                # If it wasn't found by address, search by name
+                if target_func is None:
+                    functions = fm.getFunctions(True)
+                    for func in functions:
+                        if func.getName() == function_name_or_address:
+                            target_func = func
+                            break
+                            
+                if target_func is None:
+                    print(f"Error: Function '{function_name_or_address}' not found.")
+                    return
+
+                print(f"Found function: {target_func.getName()} at {target_func.getEntryPoint()}")
+                print("Decompiling...\n" + "="*50)
+
+                # Setup Decompiler
+                ifc = DecompInterface()
+                ifc.openProgram(program)
+                
+                # Decompile with a 30-second timeout
+                monitor = ConsoleTaskMonitor()
+                results = ifc.decompileFunction(target_func, 30, monitor)
+                
+                if results.decompileCompleted():
+                    decompiled_func = results.getDecompiledFunction()
+                    if decompiled_func:
+                         print(decompiled_func.getC())
+                    else:
+                         print("Decompilation completed, but no C code was returned.")
+                else:
+                    print(f"Decompilation failed: {results.getErrorMessage()}")
+                
+                print("="*50)
+                ifc.dispose()
+                
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    with open("../project.aipiler") as f:
+        data = json.loads(f.read())
+
+    PROJ_LOC = data["project_location"]
+    PROJ_NAME = data["project_name"]
+    PROG_PATH = data["program_location"]
+    
+    if len(sys.argv) < 2:
+        print("Usage: python3 read_function_code.py <function_name_or_address>")
+        print("Example: python3 read_function_code.py FUN_00401000")
+        print("Example: python3 read_function_code.py 00401000")
+        sys.exit(1)
+        
+    func_target = sys.argv[1]
+    read_function_code(PROJ_LOC, PROJ_NAME, PROG_PATH, func_target)

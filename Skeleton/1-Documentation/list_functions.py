@@ -1,0 +1,68 @@
+import pyghidra
+from pyghidra.api import open_project, program_context
+import os
+import sys
+import json
+
+# Attempt to locate Ghidra if GHIDRA_INSTALL_DIR is not set
+if 'GHIDRA_INSTALL_DIR' not in os.environ:
+    # Common paths or the one we found
+    possible_paths = [
+        '/snap/ghidra/current/ghidra_12.0_PUBLIC',
+        '/opt/ghidra',
+        os.path.expanduser('~/ghidra')
+    ]
+    for path in possible_paths:
+        if os.path.isdir(path):
+            os.environ['GHIDRA_INSTALL_DIR'] = path
+            break
+
+def list_functions(project_location, project_name, program_path):
+    """
+    Opens a Ghidra project and lists all functions in a specific program.
+    """
+    try:
+        # Initialize Ghidra
+        pyghidra.start()
+    except Exception as e:
+        print(f"Error starting Ghidra: {e}")
+        print("Please ensure GHIDRA_INSTALL_DIR is set correctly.")
+        return
+
+    try:
+        # Open the existing project
+        with open_project(project_location, project_name, create=False) as project:
+            # Open the specific program context
+            with program_context(project, program_path) as program:
+                print(f"Successfully opened: {program.getName()}")
+                print(f"{'Address':<16} | {'Function Name'}")
+                print("-" * 40)
+                
+                fm = program.getFunctionManager()
+                # Iterate through all functions in address order
+                functions = fm.getFunctions(True)
+                
+                count = 0
+                for func in functions:
+                    print(f"{str(func.getEntryPoint()):<16} | {func.getName()}")
+                    count += 1
+                
+                print("-" * 40)
+                print(f"Total functions found: {count}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    # Default values based on the current workspace
+    with open("../project.aipiler") as f:
+        data = json.loads(f.read())
+
+    PROJ_LOC = data["project_location"]
+    PROJ_NAME = data["project_name"]
+    PROG_PATH = data["program_location"]
+    
+    # Allow command line overrides
+    if len(sys.argv) > 1:
+        PROG_PATH = sys.argv[1]
+    
+    list_functions(PROJ_LOC, PROJ_NAME, PROG_PATH)
