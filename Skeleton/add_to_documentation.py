@@ -58,7 +58,8 @@ def get_without_tag(project_location, project_name, program_path, tag_name):
                             break
                     
                     if not has_tag:
-                        output.append(f"{func.getName()}")
+                        entry = {"entry_point": f"{str(func.getEntryPoint()):<16}","function_name": func.getName() }
+                        output.append(entry)
                         count += 1
                 
                 print("-" * 40)
@@ -167,7 +168,7 @@ if __name__ == "__main__":
         output = os.system(prompt)
 
         if not output:
-            add_tag_to_function(PROJ_LOC, PROJ_NAME, PROG_PATH, str(without[0]), tag_name)
+            add_tag_to_function(PROJ_LOC, PROJ_NAME, PROG_PATH, str(without[0]["entry_point"]).strip(), tag_name)
 
 
 
