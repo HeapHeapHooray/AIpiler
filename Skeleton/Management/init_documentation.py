@@ -22,6 +22,12 @@ os.environ['PATH'] = str(tools_folder.resolve()) + os.pathsep + os.environ['PATH
 
 os.chdir(documentation_folder)
 
+def set_title(title):
+    sys.stderr.write(f"\033]0;{title}\007")
+    sys.stderr.flush()
+
+set_title("init_documentation — Initializing Documentation...")
+
 with open(documentation_folder / "FUNCTION_SIGNATURES.md","w") as f:
     f.write("""
 # FUNCTION_SIGNATURES.md
