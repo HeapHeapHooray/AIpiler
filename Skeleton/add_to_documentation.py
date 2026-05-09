@@ -5,6 +5,7 @@ from pyghidra.api import open_project, program_context
 import os
 import sys
 import json
+import subprocess
 from pathlib import Path
 
 # Attempt to locate Ghidra if GHIDRA_INSTALL_DIR is not set
@@ -181,9 +182,11 @@ if __name__ == "__main__":
 
         print(prompt)
 
-        output = os.system(prompt)
+        result = subprocess.run(prompt, shell=True)
+        output = result.returncode
 
-        if not output:
+        exited_succesfully = lambda code: code == 0
+        if exited_succesfully(output):
             add_tag_to_function(PROJ_LOC, PROJ_NAME, PROG_PATH, str(without[0]["entry_point"]).strip(), tag_name)
 
 
