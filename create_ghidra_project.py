@@ -42,14 +42,36 @@ def create_ghidra_project(binary_path_raw: str):
         f.write(json.dumps(project_data))
 
 
-    with pyghidra.open_program(
-        binary_path, 
-        project_location=custom_storage, 
-        project_name=ghidra_project_name,
-        analyze=True  # Ensure analysis runs in this specific project
-    ) as flat_api:
-        program = flat_api.getCurrentProgram()
+    pyghidra.start()
+
+    from ghidra.base.project import GhidraProject
+    from ghidra.program.flatapi import FlatProgramAPI
+    from ghidra.program.util import GhidraProgramUtilities
+    from ghidra.app.script import GhidraScriptUtil
+
+    project_dir = custom_storage / ghidra_project_name
+    project_dir.mkdir(parents=True, exist_ok=True)
+
+    project = GhidraProject.createProject(str(project_dir), ghidra_project_name, False)
+    try:
+        program = project.importProgram(binary_path)
+        if program is None:
+            raise RuntimeError(f"Ghidra failed to import '{binary_path}'.")
+        project.saveAs(program, "/", binary_path.name, True)
+
+        flat_api = FlatProgramAPI(program)
+        if GhidraProgramUtilities.shouldAskToAnalyze(program):
+            GhidraScriptUtil.acquireBundleHostReference()
+            try:
+                flat_api.analyzeAll(program)
+                GhidraProgramUtilities.markProgramAnalyzed(program)
+            finally:
+                GhidraScriptUtil.releaseBundleHostReference()
+
         print(f"Project stored at: {custom_storage}")
+    finally:
+        project.save(program)
+        project.close()
 
 if __name__ == "__main__":
     import argparse
