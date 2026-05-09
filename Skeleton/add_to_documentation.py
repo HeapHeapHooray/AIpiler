@@ -84,6 +84,8 @@ def get_without_tag(project_location, project_name, program_path, tag_name, sort
     except Exception as e:
         print(f"An error occurred: {e}")
 
+    return output
+
 def add_tag_to_function(project_location, project_name, program_path, function_name_or_address, tag_name):
     """
     Opens a Ghidra project and adds a tag to a specific function.
