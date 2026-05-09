@@ -5,13 +5,16 @@ import json
 
 def create_ghidra_project(binary_path_raw: str):
     binary_path = Path(binary_path_raw)
-    custom_storage = Path.cwd() / binary_path.stem
+
+    aipiler_folder = Path(__file__).parent
+
+    custom_storage = aipiler_folder / "Workspaces" / binary_path.stem
     custom_storage.mkdir(parents=True,exist_ok=False)
 
     workspace = custom_storage / (binary_path.stem+"-Workspace")
     ghidra_project_name = binary_path.stem + "-Ghidra"
 
-    shutil.copytree(Path.cwd() / "Skeleton",workspace)
+    shutil.copytree(aipiler_folder / "Skeleton",workspace)
 
     project_data = {"project_name":ghidra_project_name,
                     "project_location":str(custom_storage / ghidra_project_name),
