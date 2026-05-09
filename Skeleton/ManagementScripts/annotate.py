@@ -5,8 +5,8 @@ import os
 import subprocess
 from pathlib import Path
 
-tools_folder = Path(__file__).parent / "Tools"
-annotation_folder = Path(__file__).parent / "2-Annotation"
+tools_folder = Path(__file__).parent.parent / "Tools"
+annotation_folder = Path(__file__).parent.parent / "2-Annotation"
 
 sys.path.append(tools_folder)
 os.environ['PATH'] = str(tools_folder.resolve()) + os.pathsep + os.environ['PATH']

@@ -149,7 +149,7 @@ def add_tag_to_function(project_location, project_name, program_path, function_n
 if __name__ == "__main__":
     tag_name = "Documented-1"
 
-    project_aipiler = Path(__file__).parent / "project.aipiler"
+    project_aipiler = Path(__file__).parent.parent / "project.aipiler"
     with open(project_aipiler) as f:
         data = json.loads(f.read())
 
@@ -160,8 +160,8 @@ if __name__ == "__main__":
     without = get_without_tag(PROJ_LOC, PROJ_NAME, PROG_PATH, tag_name,sort_size=True)
 
     if len(without):
-        tools_folder = Path(__file__).parent / "Tools"
-        documentation_folder = Path(__file__).parent / "1-Documentation"
+        tools_folder = Path(__file__).parent.parent / "Tools"
+        documentation_folder = Path(__file__).parent.parent / "1-Documentation"
 
         sys.path.append(tools_folder)
         os.environ['PATH'] = str(tools_folder.resolve()) + os.pathsep + os.environ['PATH']
