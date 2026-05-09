@@ -117,6 +117,12 @@ Any model supported by OpenCode can be used here.
 
 ---
 
+## Current status
+
+AIpiler currently **annotates and documents** the Ghidra project — it renames symbols, tags functions, and produces architecture and function signature documentation. **It does not yet compile or reconstruct source code.** The end goal of generating compilable source that matches the original binary is planned but not yet implemented.
+
+---
+
 ## Design notes
 
 **Tag-based progress tracking** — AIpiler uses Ghidra's native function tagging as a persistent progress store. No external database needed; tags survive process restarts and are visible inside the Ghidra GUI.
