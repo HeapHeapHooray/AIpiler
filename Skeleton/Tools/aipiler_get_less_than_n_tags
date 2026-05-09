@@ -20,7 +20,7 @@ if 'GHIDRA_INSTALL_DIR' not in os.environ:
             os.environ['GHIDRA_INSTALL_DIR'] = path
             break
 
-def get_less_than_n_tags(project_location, project_name, program_path, n):
+def get_less_than_n_tags(project_location, project_name, program_path, n, sort_size=False):
     """
     Opens a Ghidra project and lists all functions that have less than n tags.
     """
@@ -38,30 +38,51 @@ def get_less_than_n_tags(project_location, project_name, program_path, n):
             # Open the specific program context
             with program_context(project, program_path) as program:
                 print(f"Successfully opened: {program.getName()}")
-                print(f"{'Address':<16} | {'Tags':<4} | {'Function Name'}")
-                print("-" * 50)
                 
                 fm = program.getFunctionManager()
                 # Iterate through all functions in address order
                 functions = fm.getFunctions(True)
                 
-                count = 0
+                results = []
                 for func in functions:
                     tags = func.getTags()
                     num_tags = len(tags)
                     if num_tags < n:
-                        print(f"{str(func.getEntryPoint()):<16} | {num_tags:<4} | {func.getName()}")
-                        count += 1
+                        results.append({
+                            "address": str(func.getEntryPoint()),
+                            "num_tags": num_tags,
+                            "name": func.getName(),
+                            "size": func.getBody().getNumAddresses()
+                        })
                 
-                print("-" * 50)
-                print(f"Total functions with less than {n} tags: {count}")
+                if sort_size:
+                    results.sort(key=lambda x: x["size"], reverse=True)
+                    print(f"{'Address':<16} | {'Size':<10} | {'Tags':<4} | {'Function Name'}")
+                    print("-" * 65)
+                else:
+                    print(f"{'Address':<16} | {'Tags':<4} | {'Function Name'}")
+                    print("-" * 50)
+                
+                for res in results:
+                    if sort_size:
+                        print(f"{res['address']:<16} | {res['size']:<10} | {res['num_tags']:<4} | {res['name']}")
+                    else:
+                        print(f"{res['address']:<16} | {res['num_tags']:<4} | {res['name']}")
+                
+                print("-" * (65 if sort_size else 50))
+                print(f"Total functions with less than {n} tags: {len(results)}")
     except Exception as e:
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
+    sort_size = False
+    if "--sort-size" in sys.argv:
+        sort_size = True
+        sys.argv.remove("--sort-size")
+
     if len(sys.argv) < 2:
-        print("Usage: python3 get_less_than_n_tags.py <n> [program_location]")
-        print("Example: python3 get_less_than_n_tags.py 2")
+        print("Usage: python3 get_less_than_n_tags.py <n> [--sort-size] [program_location]")
+        print("Example: python3 get_less_than_n_tags.py 2 --sort-size")
         sys.exit(1)
         
     try:

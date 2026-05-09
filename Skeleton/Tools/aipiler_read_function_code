@@ -64,6 +64,11 @@ def read_function_code(project_location, project_name, program_path, function_na
                     return
 
                 print(f"Found function: {target_func.getName()} at {target_func.getEntryPoint()}")
+                tags = [tag.getName() for tag in target_func.getTags()]
+                if tags:
+                    print(f"Tags: {', '.join(tags)}")
+                else:
+                    print("Tags: None")
                 print("Decompiling...\n" + "="*50)
 
                 # Setup Decompiler
