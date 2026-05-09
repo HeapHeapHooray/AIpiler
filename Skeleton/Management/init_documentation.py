@@ -32,7 +32,7 @@ with open(documentation_folder / "FUNCTION_SIGNATURES.md","w") as f:
 ### Overview: "THE PURPOSE OF THIS FUNCTION"
 ### Special Notes: NONE
 ### -- Signature Body Specification End --
-# SIGNATURES_INDEX:   """)
+# SIGNATURES_INDEX   """)
 
 subprocess.run(f"""opencode run -m {get_model()} "
 aipiler_get_entry_function_name, gets the name or address of the entry function/point.
