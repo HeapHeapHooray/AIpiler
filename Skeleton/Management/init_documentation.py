@@ -34,6 +34,7 @@ with open(documentation_folder / "FUNCTION_SIGNATURES.md","w") as f:
 ### (PARAMETER_NAME_2) - "Description of it's purpose"
 ### (PARAMETER_NAME_3) - "Description of it's purpose"
 ### ...
+### Return: RETURN_TYPE - "Description of what it means in context."
 ### Special Notes: NONE
 ### -- Signature Body Specification End --
 # SIGNATURES_INDEX   """)
