@@ -8,17 +8,17 @@
     "read": {
       "*": "deny",
       "/tmp/*": "allow",
-      ".*": "allow",
-    ".other_files/*": "allow"
+      "./*": "allow",
+    "./other_files/*": "allow"
     },
     "edit": {
     "*": "deny",
-    ".*": "deny",
+    "./*": "deny",
     "/tmp/*": "allow",
-    ".ARCHITECTURE.md": "allow",
-    ".QUESTIONS.md": "allow",
-    ".WEIGHTED_TAGS.md": "allow",
-    ".other_files/*": "allow"
+    "./ARCHITECTURE.md": "allow",
+    "./QUESTIONS.md": "allow",
+    "./WEIGHTED_TAGS.md": "allow",
+    "./other_files/*": "allow"
     },
     "task": {
     "*": "deny"
