@@ -20,7 +20,8 @@ if 'GHIDRA_INSTALL_DIR' not in os.environ:
             os.environ['GHIDRA_INSTALL_DIR'] = path
             break
 
-def get_without_tag(project_location, project_name, program_path, tag_name):
+
+def get_without_tag(project_location, project_name, program_path, tag_name, sort_size=False):
     """
     Opens a Ghidra project and lists all functions that do not have the specified tag.
     """
@@ -41,14 +42,12 @@ def get_without_tag(project_location, project_name, program_path, tag_name):
             # Open the specific program context
             with program_context(project, program_path) as program:
                 print(f"Successfully opened: {program.getName()}")
-                print(f"{'Address':<16} | {'Function Name'}")
-                print("-" * 40)
-                
+
                 fm = program.getFunctionManager()
                 # Iterate through all functions in address order
                 functions = fm.getFunctions(True)
-                
-                count = 0
+
+                results = []
                 for func in functions:
                     tags = func.getTags()
                     has_tag = False
@@ -56,19 +55,34 @@ def get_without_tag(project_location, project_name, program_path, tag_name):
                         if tag.getName() == tag_name:
                             has_tag = True
                             break
-                    
+
                     if not has_tag:
-                        entry = {"entry_point": f"{str(func.getEntryPoint()):<16}","function_name": func.getName() }
-                        output.append(entry)
-                        count += 1
-                
-                print("-" * 40)
-                print(f"Total functions without tag '{tag_name}': {count}")
+                        results.append({
+                            "address": str(func.getEntryPoint()),
+                            "name": func.getName(),
+                            "size": func.getBody().getNumAddresses()
+                        })
+
+                if sort_size:
+                    results.sort(key=lambda x: x["size"], reverse=True)
+                    print(f"{'Address':<16} | {'Size':<10} | {'Function Name'}")
+                    print("-" * 55)
+                else:
+                    print(f"{'Address':<16} | {'Function Name'}")
+                    print("-" * 40)
+
+                for res in results:
+                    if sort_size:
+                        entry = {"entry_point": f"{res['address']:<16}","function_size": f"{res['size']:<10}","function_name": res['name'] }
+                        print(f"{res['address']:<16} | {res['size']:<10} | {res['name']}")
+                    else:
+                        entry = {"entry_point": f"{res['address']:<16}","function_name": res['name'] }
+                    output.append(entry)
+
+                print("-" * (55 if sort_size else 40))
+                print(f"Total functions without tag '{tag_name}': {len(results)}")
     except Exception as e:
         print(f"An error occurred: {e}")
-
-    return output
-
 
 def add_tag_to_function(project_location, project_name, program_path, function_name_or_address, tag_name):
     """
@@ -140,7 +154,7 @@ if __name__ == "__main__":
     PROJ_NAME = data["project_name"]
     PROG_PATH = data["program_location"]
 
-    without = get_without_tag(PROJ_LOC, PROJ_NAME, PROG_PATH, tag_name)
+    without = get_without_tag(PROJ_LOC, PROJ_NAME, PROG_PATH, tag_name,sort_size=True)
 
     if len(without):
         tools_folder = Path(__file__).parent / "Tools"
