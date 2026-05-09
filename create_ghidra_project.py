@@ -2,6 +2,21 @@ import pyghidra
 from pathlib import Path
 import shutil
 import json
+import os
+
+# Attempt to locate Ghidra if GHIDRA_INSTALL_DIR is not set
+if 'GHIDRA_INSTALL_DIR' not in os.environ:
+    # Common paths or the one we found
+    possible_paths = [
+        '/snap/ghidra/current/ghidra_12.0_PUBLIC',
+        '/opt/ghidra',
+        os.path.expanduser('~/ghidra')
+    ]
+    for path in possible_paths:
+        if os.path.isdir(path):
+            os.environ['GHIDRA_INSTALL_DIR'] = path
+            break
+
 
 def create_ghidra_project(binary_path_raw: str):
     binary_path = Path(binary_path_raw)
