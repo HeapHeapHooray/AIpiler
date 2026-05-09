@@ -17,7 +17,7 @@ from pathlib import Path
 tools_folder = Path(__file__).parent.parent / "Tools"
 documentation_folder = Path(__file__).parent.parent / "1-Documentation"
 
- if (documentation_folder / "ARCHITECTURE.md").exists():
+if (documentation_folder / "ARCHITECTURE.md").exists():
      print("Documentation has already been initialized !")
      exit()
 
