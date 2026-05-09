@@ -201,7 +201,7 @@ if __name__ == "__main__":
             print("All functions have been tagged.")
             break
 
-        set_title(f"add_to_documentation — Iteration {iteration} | {len(without)} untagged remaining")
+        set_title(f"add_to_documentation — Iteration {iteration} | {BATCH_COUNT} functions per iteration | {len(without)} untagged remaining")
 
         prompt_text = f"""
         -- Bash Commands --
