@@ -30,6 +30,10 @@ with open(documentation_folder / "FUNCTION_SIGNATURES.md","w") as f:
 ### <FUNCTION_NAME | FUNCTION_ADDRESS> - Size: LINES_OF_CODE
 ### TAGS: [...,...]
 ### Overview: "THE PURPOSE OF THIS FUNCTION"
+### (PARAMETER_NAME_1) - "Description of it's purpose"
+### (PARAMETER_NAME_2) - "Description of it's purpose"
+### (PARAMETER_NAME_3) - "Description of it's purpose"
+### ...
 ### Special Notes: NONE
 ### -- Signature Body Specification End --
 # SIGNATURES_INDEX   """)
