@@ -3,6 +3,7 @@
 import pyghidra
 import os
 import sys
+import time
 import json
 from pathlib import Path
 
@@ -34,65 +35,71 @@ def read_function_code(project_location, project_name, program_path, function_na
     from ghidra.app.decompiler import DecompInterface
     from ghidra.util.task import ConsoleTaskMonitor
 
-    try:
-        with open_project(project_location, project_name, create=False) as project:
-            with program_context(project, program_path) as program:
-                print(f"Successfully opened: {program.getName()}")
-                
-                fm = program.getFunctionManager()
-                target_func = None
+    while True:
+        try:
+            with open_project(project_location, project_name, create=False) as project:
+                with program_context(project, program_path) as program:
+                    print(f"Successfully opened: {program.getName()}")
+                    
+                    fm = program.getFunctionManager()
+                    target_func = None
 
-                # Try to parse as an address first
-                try:
-                    addr = program.getAddressFactory().getAddress(function_name_or_address)
-                    if addr is not None:
-                         # Get the function containing this address (in case it's not the exact entry point)
-                         target_func = fm.getFunctionContaining(addr)
-                except Exception:
-                    pass
-                
-                # If it wasn't found by address, search by name
-                if target_func is None:
-                    functions = fm.getFunctions(True)
-                    for func in functions:
-                        if func.getName() == function_name_or_address:
-                            target_func = func
-                            break
-                            
-                if target_func is None:
-                    print(f"Error: Function '{function_name_or_address}' not found.")
-                    return
+                    # Try to parse as an address first
+                    try:
+                        addr = program.getAddressFactory().getAddress(function_name_or_address)
+                        if addr is not None:
+                             # Get the function containing this address (in case it's not the exact entry point)
+                             target_func = fm.getFunctionContaining(addr)
+                    except Exception:
+                        pass
+                    
+                    # If it wasn't found by address, search by name
+                    if target_func is None:
+                        functions = fm.getFunctions(True)
+                        for func in functions:
+                            if func.getName() == function_name_or_address:
+                                target_func = func
+                                break
+                                
+                    if target_func is None:
+                        print(f"Error: Function '{function_name_or_address}' not found.")
+                        return
 
-                print(f"Found function: {target_func.getName()} at {target_func.getEntryPoint()}")
-                tags = [tag.getName() for tag in target_func.getTags()]
-                if tags:
-                    print(f"Tags: {', '.join(tags)}")
-                else:
-                    print("Tags: None")
-                print("Decompiling...\n" + "="*50)
-
-                # Setup Decompiler
-                ifc = DecompInterface()
-                ifc.openProgram(program)
-                
-                # Decompile with a 30-second timeout
-                monitor = ConsoleTaskMonitor()
-                results = ifc.decompileFunction(target_func, 30, monitor)
-                
-                if results.decompileCompleted():
-                    decompiled_func = results.getDecompiledFunction()
-                    if decompiled_func:
-                         print(decompiled_func.getC())
+                    print(f"Found function: {target_func.getName()} at {target_func.getEntryPoint()}")
+                    tags = [tag.getName() for tag in target_func.getTags()]
+                    if tags:
+                        print(f"Tags: {', '.join(tags)}")
                     else:
-                         print("Decompilation completed, but no C code was returned.")
-                else:
-                    print(f"Decompilation failed: {results.getErrorMessage()}")
-                
-                print("="*50)
-                ifc.dispose()
-                
-    except Exception as e:
-        print(f"An error occurred: {e}")
+                        print("Tags: None")
+                    print("Decompiling...\n" + "="*50)
+
+                    # Setup Decompiler
+                    ifc = DecompInterface()
+                    ifc.openProgram(program)
+                    
+                    # Decompile with a 30-second timeout
+                    monitor = ConsoleTaskMonitor()
+                    results = ifc.decompileFunction(target_func, 30, monitor)
+                    
+                    if results.decompileCompleted():
+                        decompiled_func = results.getDecompiledFunction()
+                        if decompiled_func:
+                             print(decompiled_func.getC())
+                        else:
+                             print("Decompilation completed, but no C code was returned.")
+                    else:
+                        print(f"Decompilation failed: {results.getErrorMessage()}")
+                    
+                    print("="*50)
+                    ifc.dispose()
+            break
+        except Exception as e:
+            if "lock" in str(e).lower():
+                print("Failed to acquire project lock, retrying in 2s...", file=sys.stderr)
+                time.sleep(2)
+            else:
+                print(f"An error occurred: {e}")
+                break
 
 
 if __name__ == "__main__":

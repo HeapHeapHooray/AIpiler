@@ -4,6 +4,7 @@ import pyghidra
 from pyghidra.api import open_project, program_context
 import os
 import sys
+import time
 import json
 from pathlib import Path
 
@@ -32,36 +33,43 @@ def get_entry_function_name(project_location, project_name, program_path):
         print("Please ensure GHIDRA_INSTALL_DIR is set correctly.")
         return
 
-    try:
-        # Open the existing project
-        with open_project(project_location, project_name, create=False) as project:
-            # Open the specific program context
-            with program_context(project, program_path) as program:
-                print(f"Successfully opened: {program.getName()}")
-                
-                symbol_table = program.getSymbolTable()
-                entry_points = symbol_table.getExternalEntryPointIterator()
-                
-                if not entry_points.hasNext():
-                    print("Error: No entry points found.")
-                    return
-                
-                # Use the first entry point
-                entry_addr = entry_points.next()
-                fm = program.getFunctionManager()
-                entry_func = fm.getFunctionAt(entry_addr)
-                
-                if entry_func:
-                    print(f"Entry function: {entry_func.getName()}")
-                else:
-                    # If no function at exact address, maybe it's just a label
-                    symbol = symbol_table.getPrimarySymbol(entry_addr)
-                    if symbol:
-                        print(f"Entry symbol: {symbol.getName()}")
+    while True:
+        try:
+            # Open the existing project
+            with open_project(project_location, project_name, create=False) as project:
+                # Open the specific program context
+                with program_context(project, program_path) as program:
+                    print(f"Successfully opened: {program.getName()}")
+                    
+                    symbol_table = program.getSymbolTable()
+                    entry_points = symbol_table.getExternalEntryPointIterator()
+                    
+                    if not entry_points.hasNext():
+                        print("Error: No entry points found.")
+                        return
+                    
+                    # Use the first entry point
+                    entry_addr = entry_points.next()
+                    fm = program.getFunctionManager()
+                    entry_func = fm.getFunctionAt(entry_addr)
+                    
+                    if entry_func:
+                        print(f"Entry function: {entry_func.getName()}")
                     else:
-                        print(f"Entry point at {entry_addr} but no function or symbol found.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+                        # If no function at exact address, maybe it's just a label
+                        symbol = symbol_table.getPrimarySymbol(entry_addr)
+                        if symbol:
+                            print(f"Entry symbol: {symbol.getName()}")
+                        else:
+                            print(f"Entry point at {entry_addr} but no function or symbol found.")
+            break
+        except Exception as e:
+            if "lock" in str(e).lower():
+                print("Failed to acquire project lock, retrying in 2s...", file=sys.stderr)
+                time.sleep(2)
+            else:
+                print(f"An error occurred: {e}")
+                break
 
 if __name__ == "__main__":
     project_aipiler = Path(__file__).parent.parent / "project.aipiler"
