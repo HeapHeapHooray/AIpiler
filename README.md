@@ -3,4 +3,4 @@
 
 # Dependencies
 ### [pyghidra](https://pypi.org/project/pyghidra/)
-### [Ralph](https://github.com/Th0rgal/open-ralph-wiggum)
+### [OpenCode](https://opencode.ai/)
