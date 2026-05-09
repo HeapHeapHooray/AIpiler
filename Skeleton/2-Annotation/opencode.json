@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "bash": {
+    "*": "allow",
+    "aipiler*": "allow"
+    },
+    "read": {
+      "*": "deny",
+      "/tmp/*": "allow",
+      ".*": "allow",
+    ".other_files/*": "allow"
+    },
+    "edit": {
+    "*": "deny",
+    ".*": "deny",
+    "/tmp/*": "allow",
+    ".ARCHITECTURE.md": "allow",
+    ".QUESTIONS.md": "allow",
+    ".WEIGHTED_TAGS.md": "allow",
+    ".other_files/*": "allow"
+    },
+    "task": {
+    "*": "deny"
+    }
+  }
+}
