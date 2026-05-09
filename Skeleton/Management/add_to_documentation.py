@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 
+import json
+
+def get_model():
+    model_file = Path(__file__).parent / "model.json"
+    with open(model_file) as f:
+        return json.loads(f.read())["model_used"]
+    # "You never know!" - FALLBACK
+    return "anthropic/claude-haiku-4-5"
+
 import pyghidra
 from pyghidra.api import open_project, program_context
 import os
@@ -178,7 +187,7 @@ if __name__ == "__main__":
         Annotate the function being analyzed with aipiler_add_tag_to_function.
         DO NOT ACCESS FILES OUTSIDE OF THE CWD."""
 
-        prompt = f"opencode run -m anthropic/claude-haiku-4-5 {shlex.quote(prompt_text)}"
+        prompt = f"opencode run -m {get_model()} {shlex.quote(prompt_text)}"
 
         print(prompt)
 
