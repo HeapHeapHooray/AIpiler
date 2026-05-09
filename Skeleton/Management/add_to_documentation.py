@@ -180,11 +180,13 @@ if __name__ == "__main__":
         import shlex
 
         prompt_text = f"""
+        -- Bash Commands --
         aipiler_read_function_code <function_name>, to read a function's code.
         aipiler_add_tag_to_function <function_name> <tag_name>, to add a tag to a function in the Ghidra project.
-        Describe the code of the function '<{without[0]}>' using aipiler_read_function_code, especially with regards to context, save it to ./FUNCTION_SIGNATURES.md and discuss it in ./ARCHITECTURE.md as you also refer to the ./QUESTIONS.md file to add and answer questions related to the architecture.
+        --
+        Describe the code of the functions '<{without[0:10]}>' using aipiler_read_function_code, especially with regards to context, update ./FUNCTION_SIGNATURES.md with them and discuss it in ./ARCHITECTURE.md as you also refer to the ./QUESTIONS.md file to add and answer questions related to the architecture.
         Any file other than ./ARCHITECTURE.md , ./FUNCTION_SIGNATURES.md, and ./QUESTIONS.md should be stored in ./other_files
-        Annotate the function being analyzed with aipiler_add_tag_to_function.
+        Annotate the functions being analyzed with the tag "Documented-1" using aipiler_add_tag_to_function.
         DO NOT ACCESS FILES OUTSIDE OF THE CWD."""
 
         prompt = f"opencode run -m {get_model()} {shlex.quote(prompt_text)}"
@@ -195,8 +197,8 @@ if __name__ == "__main__":
         output = result.returncode
 
         exited_succesfully = lambda code: code == 0
-        if exited_succesfully(output):
-            add_tag_to_function(PROJ_LOC, PROJ_NAME, PROG_PATH, str(without[0]["entry_point"]).strip(), tag_name)
+        #if exited_succesfully(output):
+           # add_tag_to_function(PROJ_LOC, PROJ_NAME, PROG_PATH, str(without[0]["entry_point"]).strip(), tag_name)
 
 
 
