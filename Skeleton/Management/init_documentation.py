@@ -17,6 +17,10 @@ from pathlib import Path
 tools_folder = Path(__file__).parent.parent / "Tools"
 documentation_folder = Path(__file__).parent.parent / "1-Documentation"
 
+ if (documentation_folder / "ARCHITECTURE.md").exists():
+        print("Documentation has already been initialized !")
+        exit()
+
 sys.path.append(tools_folder)
 os.environ['PATH'] = str(tools_folder.resolve()) + os.pathsep + os.environ['PATH']
 
