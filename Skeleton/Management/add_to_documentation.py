@@ -182,6 +182,10 @@ if __name__ == "__main__":
     tools_folder = Path(__file__).parent.parent / "Tools"
     documentation_folder = Path(__file__).parent.parent / "1-Documentation"
 
+    if not (documentation_folder / "ARCHITECTURE.md").exists():
+        print("Documentation needs to be initialized first !")
+        exit()
+
     sys.path.append(tools_folder)
     os.environ['PATH'] = str(tools_folder.resolve()) + os.pathsep + os.environ['PATH']
 
