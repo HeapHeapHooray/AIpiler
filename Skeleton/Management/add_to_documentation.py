@@ -156,6 +156,13 @@ def add_tag_to_function(project_location, project_name, program_path, function_n
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Add documentation tags to Ghidra functions.")
+    parser.add_argument("--loop-till-all-are-tagged", action="store_true",
+                        help="Keep running until all functions have been tagged.")
+    args = parser.parse_args()
+
     tag_name = "Documented-1"
 
     project_aipiler = Path(__file__).parent.parent / "project.aipiler"
@@ -166,18 +173,31 @@ if __name__ == "__main__":
     PROJ_NAME = data["project_name"]
     PROG_PATH = data["program_location"]
 
-    without = get_without_tag(PROJ_LOC, PROJ_NAME, PROG_PATH, tag_name,sort_size=True)
+    import shlex
 
-    if len(without):
-        tools_folder = Path(__file__).parent.parent / "Tools"
-        documentation_folder = Path(__file__).parent.parent / "1-Documentation"
+    tools_folder = Path(__file__).parent.parent / "Tools"
+    documentation_folder = Path(__file__).parent.parent / "1-Documentation"
 
-        sys.path.append(tools_folder)
-        os.environ['PATH'] = str(tools_folder.resolve()) + os.pathsep + os.environ['PATH']
+    sys.path.append(tools_folder)
+    os.environ['PATH'] = str(tools_folder.resolve()) + os.pathsep + os.environ['PATH']
 
-        os.chdir(documentation_folder)
+    os.chdir(documentation_folder)
 
-        import shlex
+    def set_title(title):
+        sys.stderr.write(f"\033]0;{title}\007")
+        sys.stderr.flush()
+
+    iteration = 1
+
+    while True:
+        without = get_without_tag(PROJ_LOC, PROJ_NAME, PROG_PATH, tag_name, sort_size=True)
+
+        if not without:
+            set_title("add_to_documentation — Done")
+            print("All functions have been tagged.")
+            break
+
+        set_title(f"add_to_documentation — Iteration {iteration} | {len(without)} untagged remaining")
 
         prompt_text = f"""
         -- Bash Commands --
@@ -197,8 +217,11 @@ if __name__ == "__main__":
         output = result.returncode
 
         exited_succesfully = lambda code: code == 0
-        #if exited_succesfully(output):
-           # add_tag_to_function(PROJ_LOC, PROJ_NAME, PROG_PATH, str(without[0]["entry_point"]).strip(), tag_name)
+
+        iteration += 1
+
+        if not args.loop_till_all_are_tagged:
+            break
 
 
 
