@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import pyghidra
 from pathlib import Path
 import shutil
@@ -48,3 +50,11 @@ def create_ghidra_project(binary_path_raw: str):
     ) as flat_api:
         program = flat_api.getCurrentProgram()
         print(f"Project stored at: {custom_storage}")
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Create a Ghidra project for a binary.")
+    parser.add_argument("binary_path", help="Path to the binary file to analyze")
+    args = parser.parse_args()
+    
+    create_ghidra_project(args.binary_path)
