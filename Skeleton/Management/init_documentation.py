@@ -22,10 +22,22 @@ os.environ['PATH'] = str(tools_folder.resolve()) + os.pathsep + os.environ['PATH
 
 os.chdir(documentation_folder)
 
+with open(documentation_folder / "FUNCTION_SIGNATURES.md","w") as f:
+    f.write("""
+# FUNCTION_SIGNATURES.md
+## This file can be thought of as the index of all functions discussed in ARCHITECTURE.md and QUESTIONS.md.
+### -- Signature Body Specification Start --
+### <FUNCTION_NAME | FUNCTION_ADDRESS> - Size: LINES_OF_CODE
+### TAGS: [...,...]
+### Overview: "THE PURPOSE OF THIS FUNCTION"
+### Special Notes: NONE
+### -- Signature Body Specification End --
+# SIGNATURES_INDEX:   """)
+
 subprocess.run(f"""opencode run -m {get_model()} "
 aipiler_get_entry_function_name, gets the name or address of the entry function/point.
 aipiler_list_functions, to see all functions.
 aipiler_read_function_code <function_name>, to read a function's code.
-Describe the architecture of the program in the Ghidra project using aipiler_get_entry_function_name, aipiler_list_functions, and aipiler_read_function_code, save it to ./ARCHITECTURE.md, it must be really precise and full of diagrams. If it helps, create a ./QUESTIONS.md file to add and answer questions related to the architecture.
-Any file other than ./ARCHITECTURE.md and ./QUESTIONS.md should be stored in ./other_files
+Describe the architecture of the program in the Ghidra project using aipiler_get_entry_function_name, aipiler_list_functions, and aipiler_read_function_code, save it to ./ARCHITECTURE.md , it must be really precise and full of diagrams, with reviewed functions being specified in ./FUNCTION_SIGNATURES.md. If it helps, create a ./QUESTIONS.md file to add and answer questions related to the architecture.
+Any file other than ./ARCHITECTURE.md , ./FUNCTION_SIGNATURES.md, and ./QUESTIONS.md should be stored in ./other_files
 DO NOT ACCESS FILES OUTSIDE OF THE CWD." """, shell=True)

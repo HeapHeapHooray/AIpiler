@@ -26,6 +26,6 @@ os.chdir(annotation_folder)
 
 subprocess.run(f"""opencode run -m {get_model()} "
 aipiler_get_all_tags, outputs a list of all function tags in the Ghidra project.
-Weight the degree of importance of each tag in ./WEIGHTED_TAGS.md, taking ARCHITECTURE.md into consideration.
-Any file other than ./ARCHITECTURE.md ,./QUESTIONS.md , and ./WEIGHTED_TAGS.md should be stored in ./other_files
+Weight the degree of importance of each tag in ./WEIGHTED_TAGS.md, taking ARCHITECTURE.md and FUNCTION_SIGNATURES.md into consideration.
+Any file other than ./ARCHITECTURE.md , ./QUESTIONS.md , ./FUNCTION_SIGNATURES.md , and ./WEIGHTED_TAGS.md should be stored in ./other_files
 DO NOT ACCESS FILES OUTSIDE OF THE CWD." """, shell=True)

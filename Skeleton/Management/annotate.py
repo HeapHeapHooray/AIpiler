@@ -26,6 +26,6 @@ subprocess.run(f"""opencode run -m {get_model()} "
 aipiler_get_with_tag <tag_name>, outputs the list of all functions with the specified tag.
 aipiler_read_function_code <function_name>, to read a function's code.
 aipiler_rename_function <function_name> <new_name>, rename a function's name or address to a new name.
-Use aipiler_get_with_tag with the weighted tags on ./WEIGHTED_TAGS.md, rename functions with aipiler_rename_function, reading their code with aipiler_read_function_code alomg with taking all what was learned through the process of making ARCHITECTURE.md into consideration of the name choice.
-Any file other than ./ARCHITECTURE.md ,./QUESTIONS.md , and ./WEIGHTED_TAGS.md should be stored in ./other_files
+Use aipiler_get_with_tag with the weighted tags on ./WEIGHTED_TAGS.md, rename functions with aipiler_rename_function, reading their code with aipiler_read_function_code along with the expertise of ARCHITECTURE.md and FUNCTION_SIGNATURES.md for the name choice.
+Any file other than ./ARCHITECTURE.md , ./QUESTIONS.md , ./FUNCTION_SIGNATURES.md , and ./WEIGHTED_TAGS.md should be stored in ./other_files
 DO NOT ACCESS FILES OUTSIDE OF THE CWD." """, shell=True)
