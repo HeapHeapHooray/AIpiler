@@ -195,15 +195,28 @@ if __name__ == "__main__":
         sys.stderr.write(f"\033]0;{title}\007")
         sys.stderr.flush()
 
+    processed_functions = set()
     iteration = 1
 
     while True:
         without = get_without_tag(PROJ_LOC, PROJ_NAME, PROG_PATH, tag_name, sort_size=True)
 
+        if without:
+            without = [
+                w for w in without
+                if w["function_name"] not in processed_functions
+                and w["entry_point"].strip() not in processed_functions
+            ]
+
         if not without:
             set_title("add_to_documentation — Done")
             print("All functions have been tagged.")
             break
+
+        current_batch = without[0:BATCH_COUNT]
+        for f in current_batch:
+            processed_functions.add(f["function_name"])
+            processed_functions.add(f["entry_point"].strip())
 
         set_title(f"add_to_documentation — Iteration {iteration} | {BATCH_COUNT} functions per iteration | {len(without)} untagged remaining")
 
@@ -212,7 +225,7 @@ if __name__ == "__main__":
         aipiler_read_function_code <function_name>, to read a function's code.
         aipiler_add_tag_to_function <function_name> <tag_name>, to add a tag to a function in the Ghidra project.
         --
-        Describe the code of the functions '<{without[0:BATCH_COUNT]}>' using aipiler_read_function_code, especially with regards to context, update ./FUNCTION_SIGNATURES.md with them and discuss it in ./ARCHITECTURE.md as you also refer to the ./QUESTIONS.md file to add and answer questions related to the architecture.
+        Describe the code of the functions '<{current_batch}>' using aipiler_read_function_code, especially with regards to context, update ./FUNCTION_SIGNATURES.md with them and discuss it in ./ARCHITECTURE.md as you also refer to the ./QUESTIONS.md file to add and answer questions related to the architecture.
         Any file other than ./ARCHITECTURE.md , ./FUNCTION_SIGNATURES.md, and ./QUESTIONS.md should be stored in ./other_files
         Annotate the functions being analyzed with the tag "Documented-1" using aipiler_add_tag_to_function.
         DO NOT ACCESS FILES OUTSIDE OF THE CWD."""
