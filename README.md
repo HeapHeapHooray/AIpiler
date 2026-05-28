@@ -61,7 +61,7 @@ pip install pyghidra
 
 **2. Configure OpenCode authentication**
 
-By default AIpiler uses Anthropic Claude. Set up your API key per the [OpenCode auth docs](https://opencode.ai/docs).
+The default model has been changed to `deepseek-v4-flash` (`deepseek/deepseek-v4-flash`) because it is extraordinarily cheaper and able to decompile effectively. Set up your API key per the [OpenCode auth docs](https://opencode.ai/docs).
 
 **3. Clone the repo**
 
@@ -108,12 +108,13 @@ The loop runs until all functions are tagged. You can interrupt and re-run `run.
 
 ## Changing the AI model
 
-```bash
-# Edit Management/model.json inside your workspace
-{"model_used": "anthropic/claude-opus-4"}
+By default, the model is set to `"deepseek/deepseek-v4-flash"`. You can change this by editing `Management/model.json` inside your workspace:
+
+```json
+{"model_used": "deepseek/deepseek-v4-flash"}
 ```
 
-Any model supported by OpenCode can be used here.
+Any model supported by OpenCode can be used here (e.g., `"anthropic/claude-3-5-sonnet"`).
 
 ---
 
