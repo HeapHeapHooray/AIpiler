@@ -23,9 +23,11 @@ sys.path.append(tools_folder)
 os.environ['PATH'] = str(tools_folder.resolve()) + os.pathsep + os.environ['PATH']
 
 os.chdir(annotation_folder)
+os.environ['PWD'] = str(annotation_folder.resolve())
+
 
 subprocess.run(f"""opencode run -m {get_model()} "
 aipiler_get_all_tags, outputs a list of all function tags in the Ghidra project.
 Weight the degree of importance of each tag in ./WEIGHTED_TAGS.md, taking ARCHITECTURE.md and FUNCTION_SIGNATURES.md into consideration.
 Any file other than ./ARCHITECTURE.md , ./QUESTIONS.md , ./FUNCTION_SIGNATURES.md , and ./WEIGHTED_TAGS.md should be stored in ./other_files
-DO NOT ACCESS FILES OUTSIDE OF THE CWD." """, shell=True)
+DO NOT ACCESS FILES OUTSIDE OF THE CWD." """, shell=True, cwd=annotation_folder)

@@ -190,6 +190,8 @@ if __name__ == "__main__":
     os.environ['PATH'] = str(tools_folder.resolve()) + os.pathsep + os.environ['PATH']
 
     os.chdir(documentation_folder)
+    os.environ['PWD'] = str(documentation_folder.resolve())
+
 
     def set_title(title):
         sys.stderr.write(f"\033]0;{title}\007")
@@ -225,16 +227,31 @@ if __name__ == "__main__":
         aipiler_read_function_code <function_name>, to read a function's code.
         aipiler_add_tag_to_function <function_name> <tag_name>, to add a tag to a function in the Ghidra project.
         --
-        Describe the code of the functions '<{current_batch}>' using aipiler_read_function_code, especially with regards to context, update ./FUNCTION_SIGNATURES.md with them and discuss it in ./ARCHITECTURE.md as you also refer to the ./QUESTIONS.md file to add and answer questions related to the architecture.
-        Any file other than ./ARCHITECTURE.md , ./FUNCTION_SIGNATURES.md, and ./QUESTIONS.md should be stored in ./other_files
+        Describe the code of the functions '<{current_batch}>' using aipiler_read_function_code, especially with regards to context, update ./FUNCTION_SIGNATURES.md with them, writing the same things for each individual function in ./funcs/FUNCTION_NAME.signature, and discuss it in ./ARCHITECTURE.md as you also refer to the ./QUESTIONS.md file to add and answer questions related to the architecture.
+        Any file other than ./ARCHITECTURE.md , ./FUNCTION_SIGNATURES.md, and ./QUESTIONS.md should be stored either in ./other_files or ./funcs
         Annotate the functions being analyzed with the tag "Documented-1" using aipiler_add_tag_to_function.
-        DO NOT ACCESS FILES OUTSIDE OF THE CWD."""
+        DO NOT ACCESS FILES OUTSIDE OF THE CWD.
+        Function Signatures are structured in the following way:
+# FUNCTION_SIGNATURES.md
+## This file can be thought of as the index of all functions discussed in ARCHITECTURE.md and QUESTIONS.md.
+### -- Signature Body Specification Start --
+### <FUNCTION_NAME | FUNCTION_ADDRESS> - Size: LINES_OF_CODE
+### TAGS: [...,...]
+### Overview: "THE PURPOSE OF THIS FUNCTION"
+### (PARAMETER_NAME_1) - "Description of it's purpose"
+### (PARAMETER_NAME_2) - "Description of it's purpose"
+### (PARAMETER_NAME_3) - "Description of it's purpose"
+### ...
+### Return: RETURN_TYPE - "Description of what it means in context."
+### Special Notes: NONE
+### -- Signature Body Specification End --
+# SIGNATURES_INDEX   """
 
         prompt = f"opencode run -m {get_model()} {shlex.quote(prompt_text)}"
 
         print(prompt)
 
-        result = subprocess.run(prompt, shell=True)
+        result = subprocess.run(prompt, shell=True, cwd=documentation_folder)
         output = result.returncode
 
         exited_succesfully = lambda code: code == 0
